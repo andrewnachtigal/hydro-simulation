@@ -1,0 +1,25 @@
+---
+title: "k-NN Streamflow Simulation"
+output: html_notebook
+---
+
+## Streamflow Gauge Map
+USGS 09072500 COLORADO RIVER AT GLENWOOD SPRINGS, CO.
+
+```{r}
+library(maps)
+
+# USGS 09072500 
+# Latitude 39°33'00",   Longitude 107°19'13",  NAD27
+
+streamgage <- read.table(header=T, text='
+  streamgage        lat        long   datum                    name            
+           1   39.54990  -107.32061   NAD27              GlenwoodSp
+                       ')
+
+map(database = 'state', regions = 'colorado')
+points(x = streamgage$long, y=streamgage$lat)
+map(database = 'county', regions = 'colorado')
+points(x = streamgage$long, y = streamgage$lat, pch = 19, col = 'blue')
+title(main = "USGS Streamflow Gauge 09072500 \n Colorado River at Glenwood Springs, Co.", cex.main=1)
+```
