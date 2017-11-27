@@ -1,0 +1,298 @@
+---
+title: "K-NN Stochastic Simulation"
+output: html_notebook
+---
+
+```{r}
+# split by months
+splitMnth <- split(gsNF95, gsNF95$Month)
+```
+
+### Bootstrap K nearest neighbors streamflow algorithm
+
+1. fit local polynomial model
+2. save residuals
+3. estimate mean value for y_t 
+4. find k-nearest neighbors of y_t-1
+5. assign a distance-based weight to neighbors 
+6. normalize weight > metric
+7. use metric to sample a residual from the neighbor residuals
+8. calculate next month flow estimate
+9. repeat for other months and successive periods to create flow sequences
+
+```{r}
+# set mean September flow as initial value
+avgSEP <- mnthMean$mnthMean[10]
+```
+
+Simulate water year streamflow time series: 90 years/1080 months
+```{r}
+simulateWY <- function(initSep) {
+  sim90WY <- list()
+  simEstMuOct <- list()
+  for (i in 1:90){
+
+    # OCT ##############################################################
+
+    estMuOCT <- predict(fitOCT, initSep) 
+    estMuOCT
+    
+    # get Lag1 k-nearest-neighbors
+    mnthData <- splitMnth$`10` 
+    y <- mnthData$Flow[-1] # [-1,] trim for OCT
+    x <- mnthData$Lag1[-1] # [-1,] trim for OCT
+    muMnthLag <- initSep
+    knnMnthLag <- get.knnx(data=x, query=muMnthLag, k=10, algorithm=c("kd_tree", "cover_tree", "CR", "brute"))
+
+    # get Lag1 k-nearest-neighbor residuals
+    knnResMnth <- resOCT[knnMnthLag$nn.index]
+
+    # normalized nearest-neighbor distance weight vector
+    sumDist <- sum(knnMnthLag$nn.dist)
+    wtvec <- knnMnthLag$nn.dist/sumDist
+
+    # simulated next time step value: y*t = yˆ*t + e*t (estimated mean yˆ*t + sampled residual e*t)
+    simOCT <- estMuOCT + sample(knnResMnth,1,prob=wtvec)
+    
+    # NOV ##############################################################
+
+    estMuNOV <- predict(fitNOV, simOCT)
+    
+    # get Lag1 k-nearest-neighbors
+    mnthData <- splitMnth$`11` 
+    y <- mnthData$Flow
+    x <- mnthData$Lag1 
+    muMnthLag <- simOCT 
+    knnMnthLag <- get.knnx(data=x, query=muMnthLag, k=10, algorithm=c("kd_tree", "cover_tree", "CR", "brute"))
+    
+    # get Lag1 k-nearest-neighbor residuals
+    knnResMnth <- resNOV[knnMnthLag$nn.index]  
+    
+    # normalized nearest-neighbor distance weight vector
+    sumDist <- sum(knnMnthLag$nn.dist)
+    wtvec <- knnMnthLag$nn.dist/sumDist
+
+    # simulated next time step value
+    simNOV <- estMuNOV + sample(knnResMnth,1,prob=wtvec)
+    
+    # DEC ##############################################################
+
+    estMuDEC <- predict(fitDEC, simNOV) 
+    
+    # get Lag1 k-nearest-neighbors
+    mnthData <- splitMnth$`12` 
+    y <- mnthData$Flow # for graph
+    x <- mnthData$Lag1 
+    muMnthLag <- simNOV 
+    knnMnthLag <- get.knnx(data=x, query=muMnthLag, k=10, algorithm=c("kd_tree", "cover_tree", "CR", "brute"))
+    
+    # get Lag1 k-nearest-neighbor residuals
+    knnResMnth <- resDEC[knnMnthLag$nn.index] 
+    
+    # normalized nearest-neighbor distance weight vector
+    sumDist <- sum(knnMnthLag$nn.dist)
+    wtvec <- knnMnthLag$nn.dist/sumDist
+    
+    # simulated next time step value
+    simDEC <- estMuDEC + sample(knnResMnth,1,prob=wtvec)  
+    
+    # JAN ##############################################################
+
+    estMuJAN <- predict(fitJAN, simDEC)  
+
+    # get Lag1 k-nearest-neighbors 
+    mnthData <- splitMnth$`01`  
+    y <- mnthData$Flow # for graph
+    x <- mnthData$Lag1 
+    muMnthLag <- simDEC  
+    knnMnthLag <- get.knnx(data=x, query=muMnthLag, k=10, algorithm=c("kd_tree", "cover_tree", "CR", "brute"))
+    
+    # get Lag1 k-nearest-neighbor residuals
+    knnResMnth <- resJAN[knnMnthLag$nn.index] 
+    
+    # normalized nearest-neighbor distance weight vector
+    sumDist <- sum(knnMnthLag$nn.dist)
+    wtvec <- knnMnthLag$nn.dist/sumDist
+    
+    # simulated next time step value
+    simJAN <- estMuJAN + sample(knnResMnth,1,prob=wtvec)  
+    
+    # FEB ##############################################################
+
+    estMuFEB <- predict(fitFEB, simJAN) 
+    
+    # get Lag1 k-nearest-neighbors 
+    mnthData <- splitMnth$`02`  
+    y <- mnthData$Flow # for graph
+    x <- mnthData$Lag1 
+    muMnthLag <- simJAN 
+    knnMnthLag <- get.knnx(data=x, query=muMnthLag, k=10, algorithm=c("kd_tree", "cover_tree", "CR", "brute"))
+    
+    # get Lag1 k-nearest-neighbor residuals
+    knnResMnth <- resFEB[knnMnthLag$nn.index] 
+    
+    # normalized nearest-neighbor distance weight vector
+    sumDist <- sum(knnMnthLag$nn.dist)
+    wtvec <- knnMnthLag$nn.dist/sumDist
+    
+    # simulated next time step value
+    simFEB <- estMuFEB + sample(knnResMnth,1,prob=wtvec) 
+    
+    # MAR ##############################################################
+
+    estMuMAR <- predict(fitMAR, simFEB) 
+    
+    # get Lag1 k-nearest-neighbors 
+    mnthData <- splitMnth$`03`  
+    y <- mnthData$Flow # for graph
+    x <- mnthData$Lag1 
+    muMnthLag <- simFEB  
+    knnMnthLag <- get.knnx(data=x, query=muMnthLag, k=10, algorithm=c("kd_tree", "cover_tree", "CR", "brute"))
+    
+    # get Lag1 k-nearest-neighbor residuals
+    knnResMnth <- resMAR[knnMnthLag$nn.index] 
+    
+    # normalized nearest-neighbor distance weight vector
+    sumDist <- sum(knnMnthLag$nn.dist)
+    wtvec <- knnMnthLag$nn.dist/sumDist
+    
+    # simulated next time step value
+    simMAR <- estMuMAR + sample(knnResMnth,1,prob=wtvec) 
+
+    # APR ##############################################################
+
+    estMuAPR <- predict(fitAPR, simMAR)  
+    
+    # get Lag1 k-nearest-neighbors 
+    mnthData <- splitMnth$`04`  
+    y <- mnthData$Flow # for graph
+    x <- mnthData$Lag1 
+    muMnthLag <- simMAR  
+    knnMnthLag <- get.knnx(data=x, query=muMnthLag, k=10, algorithm=c("kd_tree", "cover_tree", "CR", "brute"))
+    
+    # get Lag1 k-nearest-neighbor residuals
+    knnResMnth <- resAPR[knnMnthLag$nn.index] 
+    
+    # normalized nearest-neighbor distance weight vector
+    sumDist <- sum(knnMnthLag$nn.dist)
+    wtvec <- knnMnthLag$nn.dist/sumDist
+    
+    # simulated next time step value
+    simAPR <- estMuAPR + sample(knnResMnth,1,prob=wtvec)  
+    
+    # MAY ##############################################################
+
+    estMuMAY <- predict(fitMAY, simAPR)  
+
+    # get Lag1 k-nearest-neighbors 
+    mnthData <- splitMnth$`05`  
+    y <- mnthData$Flow # for graph
+    x <- mnthData$Lag1 
+    muMnthLag <- simAPR  
+    knnMnthLag <- get.knnx(data=x, query=muMnthLag, k=10, algorithm=c("kd_tree", "cover_tree", "CR", "brute"))
+    
+    # get Lag1 k-nearest-neighbor residuals
+    knnResMnth <- resMAY[knnMnthLag$nn.index] 
+    
+    # normalized nearest-neighbor distance weight vector
+    sumDist <- sum(knnMnthLag$nn.dist)
+    wtvec <- knnMnthLag$nn.dist/sumDist
+    
+    # simulated next time step value
+    simMAY <- estMuMAY + sample(knnResMnth,1,prob=wtvec)
+    
+    # JUN ##############################################################
+
+    estMuJUN <- predict(fitJUN, simMAY) 
+    
+    # get Lag1 k-nearest-neighbors 
+    mnthData <- splitMnth$`06`  
+    y <- mnthData$Flow # for graph
+    x <- mnthData$Lag1 
+    muMnthLag <- simMAY  
+    knnMnthLag <- get.knnx(data=x, query=muMnthLag, k=10, algorithm=c("kd_tree", "cover_tree", "CR", "brute"))
+
+    # get Lag1 k-nearest-neighbor residuals
+    knnResMnth <- resJUN[knnMnthLag$nn.index]
+    
+    # normalized nearest-neighbor distance weight vector
+    sumDist <- sum(knnMnthLag$nn.dist)
+    wtvec <- knnMnthLag$nn.dist/sumDist
+    
+    # simulated next time step value
+    simJUN <- estMuJUN + sample(knnResMnth,1,prob=wtvec) 
+    
+    # JUL ##############################################################
+
+    estMuJUL <- predict(fitJUL, simJUN)  
+    
+    # get Lag1 k-nearest-neighbors 
+    mnthData <- splitMnth$`07`  
+    y <- mnthData$Flow # for graph
+    x <- mnthData$Lag1 
+    muMnthLag <- simJUN 
+    knnMnthLag <- get.knnx(data=x, query=muMnthLag, k=10, algorithm=c("kd_tree", "cover_tree", "CR", "brute"))
+    
+    # get Lag1 k-nearest-neighbor residuals
+    knnResMnth <- resJUL[knnMnthLag$nn.index] 
+    # knnResMnth
+    
+    # normalized nearest-neighbor distance weight vector
+    sumDist <- sum(knnMnthLag$nn.dist)
+    wtvec <- knnMnthLag$nn.dist/sumDist
+    
+    # simulated next time step value
+    simJUL <- estMuJUL + sample(knnResMnth,1,prob=wtvec) 
+    
+    # AUG ##############################################################
+
+    estMuAUG <- predict(fitAUG, simJUL)  
+
+    # get Lag1 k-nearest-neighbors 
+    mnthData <- splitMnth$`08`
+    y <- mnthData$Flow # for graph
+    x <- mnthData$Lag1 
+    muMnthLag <- simJUL
+    knnMnthLag <- get.knnx(data=x, query=muMnthLag, k=10, algorithm=c("kd_tree", "cover_tree", "CR", "brute"))
+    
+    # get Lag1 k-nearest-neighbor residuals
+    knnResMnth <- resAUG[knnMnthLag$nn.index]
+    # knnResMnth
+    
+    # normalized nearest-neighbor distance weight vector
+    sumDist <- sum(knnMnthLag$nn.dist)
+    wtvec <- knnMnthLag$nn.dist/sumDist
+    
+    # simulated next time step value
+    simAUG <- estMuAUG + sample(knnResMnth,1,prob=wtvec) 
+    
+    # SEP ##############################################################
+
+    estMuSEP <- predict(fitSEP, simAUG) 
+    
+    # get Lag1 k-nearest-neighbors 
+    mnthData <- splitMnth$`09`
+    y <- mnthData$Flow # for graph
+    x <- mnthData$Lag1 
+    muMnthLag <- simAUG
+    knnMnthLag <- get.knnx(data=x, query=muMnthLag, k=10, algorithm=c("kd_tree", "cover_tree", "CR", "brute"))
+
+    # get Lag1 k-nearest-neighbor residuals
+    knnResMnth <- resSEP[knnMnthLag$nn.index]
+    
+    # normalized nearest-neighbor distance weight vector
+    sumDist <- sum(knnMnthLag$nn.dist)
+    wtvec <- knnMnthLag$nn.dist/sumDist
+    
+    # simulated next time step value
+    simSEP <- estMuSEP + sample(knnResMnth,1,prob=wtvec) 
+    
+    simWY <- c(simOCT,simNOV,simDEC,simJAN,simFEB,simMAR,simAPR,simMAY,simJUN,simJUL,simAUG,simSEP)
+
+    sim90WY[[i]] <- simWY
+    initSep <- simWY[12]
+  }
+  return(sim90WY)
+}
+```
+

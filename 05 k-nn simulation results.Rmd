@@ -1,0 +1,81 @@
+---
+title: "K-NN Simulation Results"
+output: html_notebook
+---
+
+### K-Nearest Neighbors Stochastic Streamflow Simulation Results & Comparison to Historic Streamflow
+
+Summarize monthly streamflow mean, standard deviation, skewness, max and min
+```{r, echo=FALSE}
+mnthMean <- ddply(gsMNF95, .(Month), summarize, mnthMean=mean(Flow))
+mnthSD <- ddply(gsMNF95, .(Month), summarize, mnthSD=sd(Flow))
+mnthSkew <- ddply(gsMNF95, .(Month), summarize, mnthSkew=skewness(Flow))
+mnthMin <- ddply(gsMNF95, .(Month), summarize, mnthMin=min(Flow))
+mnthMax <- ddply(gsMNF95, .(Month), summarize, mnthMax=max(Flow))
+mnthStats <- as.data.frame(matrix(nrow=12,ncol=1))
+mnthStats$Mean <- round(mnthMean$mnthMean,2)
+mnthStats$SD <- round(mnthSD$mnthSD,2)
+mnthStats$Skew <- round(mnthSkew$mnthSkew,2)
+mnthStats$Min <- round(mnthMin$mnthMin,2)
+mnthStats$Max <- round(mnthMax$mnthMax,2)
+mnthStats$V1 <- c("Oct","Nov","Dec","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep")
+# mnthStats
+```
+
+```{r}
+# simulation statistics boxplots
+set.seed(1234)
+
+sim.Mean <- list()
+sim.Min <- list()
+sim.Max <- list()
+sim.SD <- list()
+sim.Skew <- list()
+
+for (i in 1:10){
+sim90 <- simulateWY(avgSEP)
+simFlow <-  as.data.frame(matrix(unlist(sim90), nrow=length(unlist(sim90[1]))))
+rownames(simFlow) <- c("Oct","Nov","Dec","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep")
+
+simMean <- round(apply(simFlow, 1, mean),2)
+sim.Mean[[i]] <- simMean
+
+simMin <- round(apply(simFlow, 1, min),2)
+sim.Min[[i]] <- simMin
+
+simMax <- round(apply(simFlow, 1, max),2)
+sim.Max[[i]] <- simMax
+
+simSD <- round(apply(simFlow, 1, sd),2)
+sim.SD[[i]] <- simSD
+
+simSkew <- round(apply(simFlow, 1, skewness),2)
+sim.Skew[[i]] <- simSkew
+}
+
+sim.Mean <- ldply(sim.Mean, rbind)
+sim.Min <- ldply(sim.Min, rbind)
+sim.Max <- ldply(sim.Max, rbind)
+sim.SD <- ldply(sim.SD, rbind)
+sim.Skew <- ldply(sim.Skew, rbind)
+
+b.mean <- boxplot(sim.Mean, las=2)
+points(mnthStats$Mean, type="b", col="blue", pch=19)
+title(main="Mean Simulated Streamflow",cex=1.5)
+
+b.SD <- boxplot(sim.SD, las=2)
+points(mnthStats$SD, type="b", col="blue", pch=19)
+title(main="Standard Deviation Simulated Streamflow",cex=1.5)
+
+b.Skew <- boxplot(sim.Skew, las=2)
+points(mnthStats$Skew, type="b", col="blue", pch=19)
+title(main="Skewness Simulated Streamflow",cex=1.5)
+
+b.Min <- boxplot(sim.Min, las=2)
+points(mnthStats$Min, type="b", col="blue", pch=19)
+title(main="Minimum Simulated Streamflow",cex=1.5)
+
+b.Max <- boxplot(sim.Max, las=2)
+points(mnthStats$Max, type="b", col="blue", pch=19)
+title(main="Maximum Simulated Streamflow",cex=1.5)
+```

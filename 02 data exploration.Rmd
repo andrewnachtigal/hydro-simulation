@@ -1,8 +1,6 @@
 ---
 title: "Streamflow Data Exploration"
 output: html_notebook:
-fig_width: 6 
-fig_height: 4 
 ---
 
 ```{r, echo=FALSE}
@@ -16,6 +14,7 @@ library(scales)
 library(sm)
 library(stats)
 library(gridExtra)
+library(FNN)
 ```
 
 #### Data Source: United States Geological Survey
@@ -24,7 +23,7 @@ Colorado River Streamflow for USGS Gauge 09072500 at Glenwood Springs, CO
   
 Natural Streamflow for the period 1906 to 2015  
 Colorado River at Glenwood Springs, CO, USGS Guage 09072500  
-Source url: https://www.usbr.gov/lc/region/g4000/NaturalFlow/current.html  
+Data url: https://www.usbr.gov/lc/region/g4000/NaturalFlow/current.html  
 
 Load annual natural streamflow data
 ```{r}
@@ -51,7 +50,7 @@ plotWY <- ggplot(gsWY95, aes(WaterYear, Flow)) +
   geom_point(size=0.9,alpha=0.35,colour="blue") + 
   geom_line(alpha=0.5,colour="blue") +
     xlab("") + ylab(expression(flow~"("*m^{3}*"/s)")) +
-    labs(title = "Monthly Natural Streamflow", subtitle = "USGS Guage 09072500, Colorado River near Glenwood Springs, CO")
+    labs(title = "Annual Streamflow", subtitle = "USGS Guage 09072500, Colorado River near Glenwood Springs, CO")
 plotWY
 ```
 
@@ -102,9 +101,8 @@ plotMTS
 
 ### Model Comparison Statistics  
 
-Monthly streamflow means, standard deviation, coefficient of skewness, maximum and minimum flows
+Summarize monthly streamflow mean, standard deviation, skewness, max and min
 ```{r, echo=FALSE}
-# summarize time series monthly statistics with ddply (split-apply-combine)
 mnthMean <- ddply(gsMNF95, .(Month), summarize, mnthMean=mean(Flow))
 mnthSD <- ddply(gsMNF95, .(Month), summarize, mnthSD=sd(Flow))
 mnthSkew <- ddply(gsMNF95, .(Month), summarize, mnthSkew=skewness(Flow))
@@ -117,7 +115,7 @@ mnthStats$Skew <- round(mnthSkew$mnthSkew,2)
 mnthStats$Min <- round(mnthMin$mnthMin,2)
 mnthStats$Max <- round(mnthMax$mnthMax,2)
 mnthStats$V1 <- c("Oct","Nov","Dec","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep")
-mnthStats
+# mnthStats
 ```
 
 ---
@@ -149,7 +147,7 @@ labs(title = "Monthly Streamflow Histogram, 1906 - 1995", subtitle = "USGS Guage
 
 ```{r}
 # split monthly data
-splitMnth <- split(gsMNF95, gsMNF95$Month)
+splitMnth <- split(gsMNF95, gsMNF95$MonthFac)
 ```
 
 ```{r}
@@ -158,11 +156,11 @@ par(mfrow=c(2,2))
 oct <- splitMnth$Oct$Flow
 nov <- splitMnth$Nov$Flow
 dec <- splitMnth$Dec$Flow
-group.index <- rep(1:3, c(length(x), length(y), length(z)))
+group.index <- rep(1:3, c(length(oct), length(nov), length(dec)))
 den.ond <- sm.density.compare(c(oct,nov,dec), group = group.index, model = "equal", col=c("blue","black","grey42"),lty=c(4,3,1), xlab="Oct Nov Dec")
 legend('topright', legend=c("oct","nov","dec"), lty=c(4,3,1), col=c("blue","black","grey42"), bty='n', cex=.75)
 
-title(outer=TRUE, line = -1, main = list("Monthly Density Comparison", cex=1.25,col="black", font=2))
+title(outer=TRUE, line = -1, main = list("Monthly Streamflow Density", cex=1.25,col="black", font=2))
 
 jan <- splitMnth$Jan$Flow
 feb <- splitMnth$Feb$Flow

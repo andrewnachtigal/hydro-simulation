@@ -1,0 +1,216 @@
+---
+title: "Streamflow Local Regression Estimation"
+output: html_notebook
+---
+
+## Monthly Streamflow Kernel Density Estimation  
+
+Split monthly data
+```{r}
+splitMnth <- split(gsMNF95, gsMNF95$Month)
+```
+
+Set current month: MARCH
+```{r}
+mnthData <- splitMnth$`03`
+```
+
+### Model fit and diagnostics
+
+Fit local linear regression with different bandwidth alphas
+```{r}
+library(locfit)
+par(mfrow=c(2,2))
+par(mar=c(4,5,2,2))
+alp <- c(0.2,0.4,0.6,0.8)
+for(a in alp) {
+  fit <- locfit(Flow~Lag1, data=mnthData, alpha=a, deg=1)
+  plot(fit, get.data=T, col="blue",
+       main=paste("alpha =",a), 
+       xlab="Yi-1 (lag1) flow", 
+       ylab="Yi flow")
+}
+```
+
+### Local Regression Diagnostics and Goodness of Fit  
+
+Smoothed Residual Plots: residuals vs. predictor to detect lack of fit
+```{r}
+par(mfrow=c(2,2))
+par(mar=c(4,5,2,2))
+alp <- c(0.2,0.4,0.6,0.8)
+for(a in alp) {
+  fit <- locfit(Flow~Lag1, data=mnthData, alpha=a, deg=2)
+  res <- residuals(fit)
+  fit2 <- locfit.raw(mnthData$Lag1, res, alpha=0.3)
+  plot(mnthData$Lag1, res, pch=16, col="blue", cex=.5,
+       main=paste("alpha =",a), 
+       ylim=c(-10,10), 
+       xlab="predictors", 
+       ylab="residuals")
+  lines(fit2)
+  abline(h=0,lty=1)
+}
+```
+
+Compare smoothing parameters to GCV score
+```{r}
+y <- mnthData$Flow
+x <- mnthData$Lag1
+
+gcvMnth <- gcvplot(y~x, kern="gauss", deg=1, ev=dat(), alpha=seq(0.01, 0.99, by=.01))
+plot(gcvMnth,col="blue")
+
+data.frame(bandwidth = gcvMnth$alpha, GCV = round(gcvMnth$values), DF=round(gcvMnth$df,1))
+alphaMnth = gcvMnth$alpha[which.min(gcvMnth$values)]
+alphaMnth
+```
+
+### Scatterplot Local Regression and k-NN Stochastic Simulation
+
+K Nearest Neighbors of Lag-1 Month Streamflow
+```{r}
+library('knitr')
+library(FNN)
+xMnthLag <- mnthMean$mnthMean[2]
+knnMnthLag <- get.knnx(data=mnthData$Lag1, query=xMnthLag, k=10, algorithm=c("kd_tree", "cover_tree", "CR", "brute"))
+knnMnthLagPts <- mnthData$Lag1[knnMnthLag$nn.index]
+knnMnthPts <- mnthData$Flow[knnMnthLag$nn.index]
+```
+
+Local regression and k nearest neighbors plot
+```{r}
+plotLocfit <- ggplot(data=mnthData, aes(x=Lag1, y=Flow)) +
+  geom_point(colour="blue",shape=1) +
+  geom_point(data=mnthData[knnMnthLag$nn.index,], aes(x=Lag1, y=Flow), colour="red", size=3, shape=2) +
+  geom_smooth(method=locfit, formula = y ~ lp(x, nn=.35, deg=1),se = F)  +
+  xlab(expression(month_Y-1~flow~"("*m^{3}*"/s)")) + 
+  ylab(expression(month_Y~flow~"("*m^{3}*"/s)")) + 
+  labs(title = "Local Regression", subtitle = "Month-on-Month Flow Dependency")
+plotLocfit
+```
+
+---
+
+### Monthly Local Regression Fits
+
+JANUARY
+```{r}
+mnthData <- splitMnth$`01`
+y <- mnthData$Flow
+x <- mnthData$Lag1
+fitJAN <- locfit(y~x, data=mnthData, alpha=0.3, deg=1)
+resJAN <- residuals(fitJAN)
+plot(fitJAN, get.data=T, xlab="mnth Yi-1 flow", ylab="mnth Yi flow")
+```
+
+FEBRUARY
+```{r}
+mnthData <- splitMnth$`02`
+y <- mnthData$Flow
+x <- mnthData$Lag1
+fitFEB <- locfit(y~x, data=mnthData, alpha=0.4, deg=1)
+resFEB <- residuals(fitFEB)
+plot(fitFEB, get.data=T, xlab="mnth Yi-1 flow", ylab="mnth Yi flow")
+```
+
+MARCH
+```{r}
+mnthData <- splitMnth$`03`
+y <- mnthData$Flow
+x <- mnthData$Lag1
+fitMAR <- locfit(y~x, data=mnthData, alpha=0.35, deg=1)
+resMAR <- residuals(fitMAR)
+plot(fitMAR, get.data=T, xlab="mnth Yi-1 flow", ylab="mnth Yi flow")
+```
+
+APRIL
+```{r}
+mnthData <- splitMnth$`04`
+y <- mnthData$Flow
+x <- mnthData$Lag1
+fitAPR <- locfit(y~x, data=mnthData, alpha=0.35, deg=1)
+resAPR <- residuals(fitAPR)
+plot(fitAPR, get.data=T, xlab="mnth Yi-1 flow", ylab="mnth Yi flow")
+```
+
+MAY
+```{r}
+mnthData <- splitMnth$`05`
+y <- mnthData$Flow
+x <- mnthData$Lag1
+fitMAY <- locfit(y~x, data=mnthData, alpha=0.3, deg=1)
+resMAY <- residuals(fitMAY)
+plot(fitMAY, get.data=T, xlab="mnth Yi-1 flow", ylab="mnth Yi flow")
+```
+
+JUNE
+```{r}
+mnthData <- splitMnth$`06`
+y <- mnthData$Flow
+x <- mnthData$Lag1
+fitJUN <- locfit(y~x, data=mnthData, alpha=0.35, deg=1)
+resJUN <- residuals(fitJUN)
+plot(fitJUN, get.data=T, xlab="mnth Yi-1 flow", ylab="mnth Yi flow")
+```
+
+JULY
+```{r}
+mnthData <- splitMnth$`07`
+y <- mnthData$Flow
+x <- mnthData$Lag1
+fitJUL <- locfit(y~x, data=mnthData, alpha=0.27, deg=1)
+resJUL <- residuals(fitJUL)
+plot(fitJUL, get.data=T, xlab="mnth Yi-1 flow", ylab="mnth Yi flow")
+```
+
+AUGUST
+```{r}
+mnthData <- splitMnth$`08`
+y <- mnthData$Flow
+x <- mnthData$Lag1
+fitAUG <- locfit(y~x, data=mnthData, alpha=0.4, deg=1)
+resAUG <- residuals(fitAUG)
+plot(fitAUG, get.data=T, xlab="mnth Yi-1 flow", ylab="mnth Yi flow")
+```
+
+```{r}
+# set month SEPTEMBER
+mnthData <- splitMnth$`09`
+y <- mnthData$Flow
+x <- mnthData$Lag1
+fitSEP <- locfit(y~x, data=mnthData, alpha=0.28, deg=1)
+resSEP <- residuals(fitSEP)
+plot(fitSEP, get.data=T, xlab="mnth Yi-1 flow", ylab="mnth Yi flow")
+```
+
+OCTOBER
+```{r}
+mnthData <- splitMnth$`10`
+y <- mnthData$Flow[-1]
+x <- mnthData$Lag1[-1]
+fitOCT <- locfit(y~x, data=mnthData, alpha=0.3, deg=1)
+resOCT <- residuals(fitOCT)
+plot(fitOCT, get.data=T, xlab="mnth Yi-1 flow", ylab="mnth Yi flow")
+```
+
+NOVEMBER
+```{r}
+mnthData <- splitMnth$`11`
+y <- mnthData$Flow
+x <- mnthData$Lag1
+fitNOV <- locfit(y~x, data=mnthData, alpha=0.44, deg=1)
+resNOV <- residuals(fitNOV)
+plot(fitNOV, get.data=T, xlab="mnth Yi-1 flow", ylab="mnth Yi flow")
+```
+
+DECEMBER
+```{r}
+mnthData <- splitMnth$`12`
+y <- mnthData$Flow
+x <- mnthData$Lag1
+fitDEC <- locfit(y~x, data=mnthData, alpha=0.3, deg=1)
+resDEC <- residuals(fitDEC)
+plot(fitDEC, get.data=T, xlab="mnth Yi-1 flow", ylab="mnth Yi flow")
+```
+
