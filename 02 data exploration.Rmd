@@ -1,6 +1,6 @@
 ---
 title: "Streamflow Data Exploration"
-output: html_notebook:
+output: html_notebook
 ---
 
 ```{r, echo=FALSE}
