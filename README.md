@@ -1,6 +1,6 @@
 ## K-Nearest Neighbors Stochastic Streamflow Simulation
 
-### 01. Motivation 
+### 01. Streamflow Simulation Motivation 
 
 ![alt text](http://url/to/img.png)
 
