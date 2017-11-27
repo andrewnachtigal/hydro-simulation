@@ -1,0 +1,12 @@
+---
+title: "Streamflow Local Regression Estimation"
+output: html_notebook
+---
+
+### Monthly Streamflow Kernel Density Estimation  
+
+```{r}
+# split monthly data
+splitMnth <- split(gsMNF95, gsMNF95$Month)
+```
+

@@ -1,0 +1,188 @@
+---
+title: "Streamflow Data Exploration"
+output: html_notebook:
+fig_width: 6 
+fig_height: 4 
+---
+
+```{r, echo=FALSE}
+library(readxl)
+library(ggplot2)
+library(plyr)
+library(dplyr)
+library(lubridate)
+library(moments)
+library(scales)
+library(sm)
+library(stats)
+library(gridExtra)
+```
+
+#### Data Source: United States Geological Survey
+
+Colorado River Streamflow for USGS Gauge 09072500 at Glenwood Springs, CO
+  
+Natural Streamflow for the period 1906 to 2015  
+Colorado River at Glenwood Springs, CO, USGS Guage 09072500  
+Source url: https://www.usbr.gov/lc/region/g4000/NaturalFlow/current.html  
+
+Load annual natural streamflow data
+```{r}
+library(readxl)
+gsWY <- read_xlsx("~/Documents/PROJECTS/Hydro/Data/Colorado River/NaturalFlows1906-2015.xlsx", 
+                  sheet = 'AnnualWYTotal Natural Flow',
+                  range = "A5:B115", col_names = TRUE)
+                  #col_types = c("date","numeric")
+```
+
+Clean up annual streamflow data  
+1. subset data range to water years 1906 - 1995  
+2. Convert data units from acre-feet/year to m^3/sec  
+```{r}
+endWY <- which(gsWY$`Water Year`==1995)
+gsWY95 <- gsWY[0:endWY,]
+gsWY95$`(ac-ft/yr)` <- gsWY95$`(ac-ft/yr)`*0.00003919
+names(gsWY95) <- c("WaterYear","Flow")
+```
+
+### Annual Streamflow Time Series Plot
+```{r}
+plotWY <- ggplot(gsWY95, aes(WaterYear, Flow)) + 
+  geom_point(size=0.9,alpha=0.35,colour="blue") + 
+  geom_line(alpha=0.5,colour="blue") +
+    xlab("") + ylab(expression(flow~"("*m^{3}*"/s)")) +
+    labs(title = "Monthly Natural Streamflow", subtitle = "USGS Guage 09072500, Colorado River near Glenwood Springs, CO")
+plotWY
+```
+
+---
+
+Load monthly streamflow data
+```{r}
+library(readxl)
+gsMNF <- read_xlsx("~/Documents/PROJECTS/Hydro/Data/Colorado River/NaturalFlows1906-2015.xlsx", 
+                  sheet = 'Total Natural Flow',
+                  range = "A5:B1328", col_names = TRUE,
+                  col_types = c("date","numeric"))
+```
+
+Clean up monthly streamflow data  
+1. assign column names  
+2. convert POSIXct datetime to date class variable, with format YYYY-MM-DD  
+3. convert acre-feet per month to cubic meters per second  
+4. subset data range to water years 1906 - 1995  
+5. Convert ac-ft/m to m^3/s  
+6. add lag -1 and month factor columns  
+
+```{r}
+names(gsMNF) <- c("Date","Flow")
+gsMNF$Date <- as.Date(gsMNF$Date, format="%Y-%m-%d")
+endMNF <- which(gsMNF$Date=="1995-09-30")
+gsMNF95 <- gsMNF[0:endMNF,]
+gsMNF95$Flow <- gsMNF95$Flow*0.00046936
+gsMNF95$Lag1 <- lag(gsMNF95$Flow, k=1)
+gsMNF95$Month <- as.factor(format(gsMNF95$Date,'%m'))
+```
+
+### Monthly Streamflow Time Series Plot  
+```{r, echo=FALSE}
+plotMTS <- ggplot(gsMNF95, aes(Date, Flow)) + 
+  geom_point(size=0.75,alpha=0.35,colour="blue") + 
+  geom_line(alpha=0.5,colour="blue") +
+  theme(axis.text.x = element_text(angle = 90)) +
+  (scale_x_date(breaks=date_breaks("5 year"), labels=date_format("%b %Y"), 
+                limits = c(as.Date("1905-10-31"), as.Date("1995-09-30")))) +
+  (scale_y_continuous(labels = scales::comma)) +
+  xlab("") + ylab(expression(flow~"("*m^{3}*"/s)")) +
+  labs(title = "Monthly Natural Streamflow", subtitle = "USGS Guage 09072500, Colorado River near Glenwood Springs, CO")
+plotMTS
+```
+
+---
+
+### Model Comparison Statistics  
+
+Monthly streamflow means, standard deviation, coefficient of skewness, maximum and minimum flows
+```{r, echo=FALSE}
+# summarize time series monthly statistics with ddply (split-apply-combine)
+mnthMean <- ddply(gsMNF95, .(Month), summarize, mnthMean=mean(Flow))
+mnthSD <- ddply(gsMNF95, .(Month), summarize, mnthSD=sd(Flow))
+mnthSkew <- ddply(gsMNF95, .(Month), summarize, mnthSkew=skewness(Flow))
+mnthMin <- ddply(gsMNF95, .(Month), summarize, mnthMin=min(Flow))
+mnthMax <- ddply(gsMNF95, .(Month), summarize, mnthMax=max(Flow))
+mnthStats <- as.data.frame(matrix(nrow=12,ncol=1))
+mnthStats$Mean <- round(mnthMean$mnthMean,2)
+mnthStats$SD <- round(mnthSD$mnthSD,2)
+mnthStats$Skew <- round(mnthSkew$mnthSkew,2)
+mnthStats$Min <- round(mnthMin$mnthMin,2)
+mnthStats$Max <- round(mnthMax$mnthMax,2)
+mnthStats$V1 <- c("Oct","Nov","Dec","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep")
+mnthStats
+```
+
+---
+
+### Distribution of Monthly Streamflow  
+
+Plot data: reorder month factor levels and rename month abbreviation
+```{r}
+gsMNF95$MonthFac = factor(gsMNF95$Month,levels(gsMNF95$Month)[c(10:12,1:9)])
+gsMNF95$MonthFac <- mapvalues(gsMNF95$Month, c("01","02","03","04","05","06","07","08","09","10","11","12"), to = c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"))
+```
+
+```{r}
+g <- ggplot(data = gsMNF95, mapping = aes(x = MonthFac, y = Flow))
+g + geom_boxplot(size=0.5) + 
+  geom_jitter(aes(color = Flow), size=0.6, show.legend=FALSE, width=0.25) + 
+  ylab(expression(streamflow~"("*m^{3}*"/s)")) + xlab("") +
+  labs(title = "Monthly Natural Streamflow, 1906 - 1995", subtitle = "USGS Guage 09072500, Colorado River near Glenwood Springs, CO")
+```
+
+### Monthly Streamflow Histograms
+```{r}
+d <- ggplot(data = gsMNF95, aes(x = Flow)) + geom_histogram(binwidth = 2, fill = "blue")
+d + facet_wrap(~ MonthFac, ncol=4) +
+labs(title = "Monthly Streamflow Histogram, 1906 - 1995", subtitle = "USGS Guage 09072500, Colorado River near Glenwood Springs, CO") + ylab("") + xlab("")
+```
+
+### Monthly Streamflow Density Estimation  
+
+```{r}
+# split monthly data
+splitMnth <- split(gsMNF95, gsMNF95$Month)
+```
+
+```{r}
+par(mfrow=c(2,2))
+
+oct <- splitMnth$Oct$Flow
+nov <- splitMnth$Nov$Flow
+dec <- splitMnth$Dec$Flow
+group.index <- rep(1:3, c(length(x), length(y), length(z)))
+den.ond <- sm.density.compare(c(oct,nov,dec), group = group.index, model = "equal", col=c("blue","black","grey42"),lty=c(4,3,1), xlab="Oct Nov Dec")
+legend('topright', legend=c("oct","nov","dec"), lty=c(4,3,1), col=c("blue","black","grey42"), bty='n', cex=.75)
+
+title(outer=TRUE, line = -1, main = list("Monthly Density Comparison", cex=1.25,col="black", font=2))
+
+jan <- splitMnth$Jan$Flow
+feb <- splitMnth$Feb$Flow
+mar <- splitMnth$Mar$Flow
+group.index <- rep(1:3, c(length(jan), length(feb), length(mar)))
+den.jfm <- sm.density.compare(c(jan,feb,mar), group = group.index, model = "equal", col=c("blue","black","grey42"),lty=c(4,3,1), xlab="Jan Feb Mar")
+legend('topright', legend=c("jan","feb","mar"), lty=c(4,3,1), col=c("blue","black","grey42"), bty='n', cex=.75)
+
+apr <- splitMnth$Apr$Flow
+may <- splitMnth$May$Flow
+jun <- splitMnth$Jun$Flow
+group.index <- rep(1:3, c(length(apr), length(may), length(jun)))
+den.amj <- sm.density.compare(c(apr,may,jun), group = group.index, model = "equal", col=c("blue","black","grey42"),lty=c(4,3,1), xlab="Apr May Jun")
+legend('topright', legend=c("apr","may","jun"), lty=c(4,3,1), col=c("blue","black","grey42"), bty='n', cex=.75)
+
+jul <- splitMnth$Jul$Flow
+aug <- splitMnth$Aug$Flow
+sep <- splitMnth$Sep$Flow
+group.index <- rep(1:3, c(length(jul), length(aug), length(sep)))
+den.jas <- sm.density.compare(c(jul,aug,sep), group = group.index, model = "equal", col=c("blue","black","grey42"),lty=c(4,3,1), xlab="Jul Aug Sep")
+legend('topright', legend=c("jul","aug","sep"), lty=c(4,3,1), col=c("blue","black","grey42"), bty='n', cex=.75)
+```
+
