@@ -14,11 +14,11 @@
 
 * Streamflow Distribution by Month: Boxplots, Histograms, and Densities
 
-![Demo Animation](../plots/plotBplot.png?raw=true)
+![Demo Animation](../plots/plotMnthBplot.png?raw=true)
 
-![Demo Animation](../plots/plotHist.png?raw=true)
+![Demo Animation](../plots/plotMnthHist.png?raw=true)
 
-![Demo Animation](../plots/plotDen.png?raw=true)
+![Demo Animation](../plots/plotMnthDen.png?raw=true)
 
 ### 03. Local Regression
 
