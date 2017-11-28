@@ -20,7 +20,7 @@
 
 ![Demo Animation](../plots/plotHist.png?raw=true)
 
-![Demo Animation](../plots/plotMNF.png?raw=true)
+![Demo Animation](../plots/plotDen.png?raw=true)
 
 ### 03. Local Regression
 
