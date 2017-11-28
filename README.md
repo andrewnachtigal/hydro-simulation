@@ -6,6 +6,8 @@
 
 ### 02. Data Exploration
 
+![Demo Animation](../plots/plotWY.png?raw=true)
+
 ### 03. Local Regression
 
 ### 04. K-Nearest Neighbors Stochastic Simulation
