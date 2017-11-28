@@ -6,7 +6,21 @@
 
 ### 02. Data Exploration
 
+* Annual Streamflows Time Series
+
 ![Demo Animation](../plots/plotWY.png?raw=true)
+
+* Monthly Streamflows Time Series
+
+![Demo Animation](../plots/plotMNF.png?raw=true)
+
+* Streamflow Distribution by Month: Boxplots, Histograms, and Densities
+
+![Demo Animation](../plots/plotBplot.png?raw=true)
+
+![Demo Animation](../plots/plotHist.png?raw=true)
+
+![Demo Animation](../plots/plotMNF.png?raw=true)
 
 ### 03. Local Regression
 
