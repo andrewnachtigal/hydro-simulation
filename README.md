@@ -6,11 +6,9 @@
 
 ### 02. Data Exploration
 
-* Annual Streamflows Time Series
+* Annual and Monthly Streamflow Time Series
 
 ![Demo Animation](../plots/plotWY.png?raw=true)
-
-* Monthly Streamflows Time Series
 
 ![Demo Animation](../plots/plotMNF.png?raw=true)
 
