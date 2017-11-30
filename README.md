@@ -17,10 +17,12 @@ A stationary process is a stochastic process whose unconditional joint probabili
 Stochastic stremflow models are meant to capture the evolution over time of real phenomena for which randomness is inherent. A concern when modeling future streamflow sequence is to allow for the simulation of sequences that are not observed in the historical record but are possible based on statistical inference from historical flows.
 
 Annual Streamflow Time Series
-![Demo Animation](../plots/plotWY.png?raw=true) . 
+
+![Demo Animation](../plots/plotWY.png?raw=true)
 
 Monthly Streamflow Time Series
-![Demo Animation](../plots/plotMNF.png?raw=true) . 
+
+![Demo Animation](../plots/plotMNF.png?raw=true)
 
 The time series plot of monthly streamflows exhibit significant annual and monthly variability.
 
@@ -34,8 +36,18 @@ The time series plot of monthly streamflows exhibit significant annual and month
 
 ### 03. Local Regression
 
+Local regression is a non-parametric regression method that combines multiple regression models in a k-nearest-neighbor-based meta-model. The streamflow local regression model estimates the conditional probability density function “locally” (e.g., the K-NN or the points within the kernel function) and simulate sequences from them. A local nonparametric regression is fitted to the successive monthly flows. Given the flow in the current month the fitted regression is used to obtain the mean flow of the next month. 
 
+![Demo Animation](../plots/plotLocalRegFit.png?raw=true)
 
 ### 04. K-Nearest Neighbors Stochastic Simulation
 
-### 05. Results
+K-NN time series resampling method approximates the conditional PDF using current value and one of the neighbors selected as the value for the next time step.
+
+### 05. Streamflow Simulation Results
+
+![Demo Animation](../plots/plotSimMean.png?raw=true)
+
+![Demo Animation](../plots/plotSimSD.png?raw=true)
+
+
