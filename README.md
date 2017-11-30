@@ -16,9 +16,12 @@ A stationary process is a stochastic process whose unconditional joint probabili
 
 Stochastic stremflow models are meant to capture the evolution over time of real phenomena for which randomness is inherent. A concern when modeling future streamflow sequence is to allow for the simulation of sequences that are not observed in the historical record but are possible based on statistical inference from historical flows.
 
-Monthly Streamflow Time Series
+Annual Streamflow Time Series
+![Demo Animation](../plots/plotWY.png?raw=true) . 
 
-![Demo Animation](../plots/plotMNF.png?raw=true)
+Monthly Streamflow Time Series
+![Demo Animation](../plots/plotMNF.png?raw=true) . 
+
 The time series plot of monthly streamflows exhibit significant annual and monthly variability.
 
 * Streamflow Boxplot Distribution by Month
