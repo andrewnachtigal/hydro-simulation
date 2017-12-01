@@ -12,8 +12,6 @@ Variable streamflows are usually modeled by stochastically generated sequences o
 
 Modeling future streamflow sequences depends on the assumption that future flows will exhibit characteristics observed in the past. Future streamflows are modeled as a stationary ergodic stochastic process, which allows for the simulation of realistic future streamflows. The assumption of ergodicity allows time averages for corresponding ensembles of future flow sequences.
 
-A stationary process is a stochastic process whose unconditional joint probability distribution does not change over time (so monthly mean is constant). An ergodic process is one for which statistical properties can be inferred from a single long random sample of the process. Stochastic methods refers to the random element incorporated in these methods, and try to predict the value of some variable at non-observed times or at non-observed locations, while also stating how uncertain we are when making these predictions.
-
 Stochastic stremflow models are meant to capture the evolution over time of real phenomena for which randomness is inherent. A concern when modeling future streamflow sequence is to allow for the simulation of sequences that are not observed in the historical record but are possible based on statistical inference from historical flows.
 
 Monthly Streamflow Time Series
