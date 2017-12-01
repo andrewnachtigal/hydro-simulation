@@ -6,7 +6,7 @@ Rivers provide a range of valuable societal benefits, including hydropower, floo
 
 Variable streamflows are usually modeled by stochastically generated sequences of synthetic streamflows, while preserving historic statistics and possibly higher order statistics. Such models assume stationary time series, that historical streamflow statistics are likely to be the same for future streamflow sequences.
 
-### 02. Data Set Exploration and Modeling Methods
+### 02. Data Exploration and Modeling Methods
 
 * Stochastic Streamflow Modeling
 
