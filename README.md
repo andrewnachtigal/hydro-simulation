@@ -18,11 +18,11 @@ Stochastic stremflow models are meant to capture the evolution over time of real
 
 The time series plot of monthly streamflows exhibit significant annual and monthly variability.
 
-* Streamflow Boxplot Distribution by Month
+Streamflow Distribution by Month
 
 ![Demo Animation](../plots/plotMnthBplot.png?raw=true)
 
-* Streamflow Histogram Distribution by Month
+Streamflow Histogram Distribution by Month
 
 ![Demo Animation](../plots/plotMnthHist.png?raw=true)
 
