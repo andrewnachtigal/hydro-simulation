@@ -1,6 +1,6 @@
 ## K-Nearest Neighbors Stochastic Streamflow Simulation
 
-### 01. River Streamflow Simulation 
+### 01. Streamflow Simulation 
 
 Rivers provide a range of valuable societal benefits, including hydropower, flood control, irrigation, navigation and recreation. Planning and management of river systems requires an understanding of the variability of river streamflow, which are climate-dependent and vary from month to month. Modeling streamflow variability allows for the analysis of risk and uncertainty and improved hydrological management. 
 
