@@ -8,13 +8,11 @@ Variable streamflows are usually modeled by stochastically generated sequences o
 
 ### 02. Data Exploration and Modeling Methods
 
-* Stochastic Streamflow Modeling
+Stochastic Streamflow Modeling
 
 Modeling future streamflow sequences depends on the assumption that future flows will exhibit characteristics observed in the past. Future streamflows are modeled as a stationary ergodic stochastic process, which allows for the simulation of realistic future streamflows. The assumption of ergodicity allows time averages for corresponding ensembles of future flow sequences.
 
 Stochastic stremflow models are meant to capture the evolution over time of real phenomena for which randomness is inherent. A concern when modeling future streamflow sequence is to allow for the simulation of sequences that are not observed in the historical record but are possible based on statistical inference from historical flows.
-
-Monthly Streamflow Time Series
 
 ![Demo Animation](../plots/plotMNF.png?raw=true)
 
