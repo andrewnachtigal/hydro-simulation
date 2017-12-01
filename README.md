@@ -32,7 +32,7 @@ The time series plot of monthly streamflows exhibit significant annual and month
 
 Local regression is a non-parametric regression method that combines multiple regression models in a k-nearest-neighbor-based meta-model. The streamflow local regression model estimates the conditional probability density function “locally” (e.g., the K-NN or the points within the kernel function) and simulate sequences from them. A local nonparametric regression is fitted to the successive monthly flows. Given the flow in the current month the fitted regression is used to obtain the mean flow of the next month. 
  
-![Demo Animation](../plots/plotLocalRegFit.png?raw=true)
+![Demo Animation](../plots/plotLocfit.png?raw=true)
 
 ### 04. K-Nearest Neighbors Stochastic Simulation
 
