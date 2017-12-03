@@ -12,6 +12,12 @@ The 90 year sequence of historical Colorado River streamflow exhibit significant
 
 ![Demo Animation](../plots/plotMNF.png?raw=true)
 
+Stochastic Streamflow Modeling
+
+Modeling future streamflows as a stationary ergodic stochastic process allows for the simulation of realistic future streamflows. The assumption of ergodicity allows time averages for corresponding ensembles of future flow sequences. A concern when modeling future streamflow sequence is to allow for the simulation of sequences not observed in the historical record but are possible based on statistical inference from historical flows. 
+
+Modeling streamflows as a stationary ergodic process allows the annual record of streamflows to be separated into monthly periods:
+
 Streamflow Distribution by Month
 
 ![Demo Animation](../plots/plotMnthBplot.png?raw=true)
@@ -19,10 +25,6 @@ Streamflow Distribution by Month
 Streamflow Histogram Distribution by Month
 
 ![Demo Animation](../plots/plotMnthHist.png?raw=true)
-
-Stochastic Streamflow Modeling
-
-Modeling future streamflows as a stationary ergodic stochastic process allows for the simulation of realistic future streamflows. The assumption of ergodicity allows time averages for corresponding ensembles of future flow sequences. A concern when modeling future streamflow sequence is to allow for the simulation of sequences not observed in the historical record but are possible based on statistical inference from historical flows.
 
 
 ### 03. Local Regression
