@@ -39,7 +39,7 @@ K-NN time series resampling method approximates the conditional PDF using curren
 
 ### 05. Streamflow Simulation Results
 
-The simulated mean and standard deviation of streamflows are modeled well by this method:
+Briefly, the simulated streamflows model historical statistics wll: mean and standard deviation of streamflows are displayed below. Simulated data are plotted with box and whisker diagrams. Historical streamflow is plotted as a solid blue line.
 
 ![Demo Animation](../plots/plotSimMean.png?raw=true)
 
