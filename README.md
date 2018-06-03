@@ -4,7 +4,7 @@
 
 Rivers provide a range of valuable societal benefits, including hydropower, flood control, irrigation, navigation and recreation. Planning for risk and uncertainty requires an understanding of the variability of river streamflow and improves hydrological management. 
 
-Variable streamflows are usually modeled by stochastically generated sequences of streamflows, whiel preserving historic statistics. Such models usually assume stationary time series - that historical streamflow statistics are likely to be the same for future streamflow sequences.
+Variable streamflows are usually modeled by stochastically generated sequences of streamflows, while preserving historic statistics. Such models usually assume stationary time series - that historical streamflow statistics are likely to be the same for future streamflow sequences.
 
 ### 02. Data Exploration and Modeling Methods
 
